@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAMA remote recording</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app" class="wrap">
+
+  <!-- ===================================================== consent ===== -->
+  <section id="screen-consent" class="screen">
+    <h1>SAMA research recording</h1>
+    <p class="lede">A short video of your face while you sit, talk and count, used to study whether
+      ordinary webcams can measure heart rate and heart-rate variability for people of every skin
+      tone. Everything below happens in your own browser on your own computer or phone.</p>
+
+    <div class="card">
+      <h2>What this involves</h2>
+      <ul>
+        <li>About 8–10 minutes, start to finish, at a time and place you choose.</li>
+        <li>Your browser will ask permission to use your camera. We record <strong>video only, no
+          audio and no microphone</strong>.</li>
+        <li>You will be asked to sit still, then talk and count out loud while looking at the
+          screen, following on-screen prompts — nobody else needs to be present or watching.</li>
+        <li>At the end, two short questions about your skin tone (so results can be checked across
+          different skin tones, which is the whole point of the study).</li>
+        <li>No diagnosis, health reading or medical advice is given to you at any point.</li>
+        <li>If you are online, the recording uploads automatically when you finish. If you are not,
+          it is saved only on this device until you are — nothing is lost either way.</li>
+        <li>You may stop at any point before finishing by closing this tab; nothing already
+          recorded is kept unless the final upload/save step completed.</li>
+      </ul>
+      <h2>Your data</h2>
+      <ul>
+        <li>Stored under a random participant code, not your name.</li>
+        <li>Used only for this research project; not shared outside the research team.</li>
+        <li>You can ask for your recording to be deleted later by contacting the researcher (email
+          below) with your participant code, which is shown to you at the end.</li>
+      </ul>
+    </div>
+
+    <label class="agree"><input type="checkbox" id="agreeBox"> I am 18 or older, I have read the
+      above, and I agree to take part.</label>
+    <div class="row">
+      <button id="startBtn" class="primary" disabled>I agree — start</button>
+      <a href="#" id="declineLink">I do not want to take part</a>
+    </div>
+    <p class="fineprint">Researcher contact: <span id="contactEmail">[TO FILL: researcher email]</span>
+      &nbsp;·&nbsp; Approved by: <span id="ethicsRef">[TO FILL: ethics committee reference]</span></p>
+  </section>
+
+  <!-- ===================================================== decline ===== -->
+  <section id="screen-decline" class="screen" hidden>
+    <h1>No problem</h1>
+    <p>Thank you for considering it. You can close this tab now — nothing has been recorded or
+      saved.</p>
+  </section>
+
+  <!-- ================================================= camera check ==== -->
+  <section id="screen-camera" class="screen" hidden>
+    <h1>One moment</h1>
+    <p>Your browser is about to ask for camera permission. Please click <strong>Allow</strong> so we
+      can check the picture before starting.</p>
+    <div id="cameraError" class="error" hidden></div>
+    <video id="checkVideo" class="preview" autoplay playsinline muted></video>
+    <div class="row">
+      <button id="retryCameraBtn" hidden>Try again</button>
+      <button id="toInstructionsBtn" class="primary" hidden>Looks good — continue</button>
+    </div>
+    <p class="hint">Make sure your face is visible, the room isn't too dark, and the camera isn't
+      covered.</p>
+  </section>
+
+  <!-- =============================================== instructions ====== -->
+  <section id="screen-instructions" class="screen" hidden>
+    <h1>Before you start</h1>
+    <ul>
+      <li>Sit about an arm's length from the screen, with your face centred in the picture above.</li>
+      <li>Using a mobile phone? Prop it up on a stable surface (a stack of books, a stand) so it
+        doesn't move — please don't hold it in your hand. A laptop or desktop webcam is just as good.</li>
+      <li>Try to keep your head roughly still during each step — small movements are fine.</li>
+      <li>The recording runs straight through, about <span id="totalMin"></span> minutes, with
+        on-screen instructions for each part. You don't need to do anything except follow them.</li>
+      <li>Please don't close this tab once you start — if you need to stop, that's okay, just
+        know the recording won't be saved unless you reach the end.</li>
+    </ul>
+    <div class="row">
+      <button id="beginRecBtn" class="primary">Start the recording</button>
+    </div>
+  </section>
+
+  <!-- =================================================== recording ====== -->
+  <section id="screen-recording" class="screen" hidden>
+    <video id="recVideo" class="preview" autoplay playsinline muted></video>
+    <div class="recHud">
+      <div class="recDot"></div>
+      <div id="blockTitle" class="blockTitle"></div>
+      <div id="blockTimer" class="blockTimer"></div>
+    </div>
+    <p id="blockPrompt" class="blockPrompt"></p>
+    <ul id="blockLines" class="blockLines"></ul>
+  </section>
+
+  <!-- ====================================================== ratings ===== -->
+  <section id="screen-rating" class="screen" hidden>
+    <h1>Almost done — a few quick questions</h1>
+    <div class="card">
+      <h2>1. Which swatch is closest to your skin tone?</h2>
+      <p class="hint">This is the Monk Skin Tone scale, used in research to represent the full
+        range of human skin tones fairly. Pick under normal indoor light if you can.</p>
+      <div id="monkSwatches" class="swatches"></div>
+    </div>
+    <div class="card">
+      <h2>2. Does your skin tend to sunburn or tan?</h2>
+      <div class="radioGroup" id="fitzQ1">
+        <label><input type="radio" name="fitzQ1" value="always_burns"> Always burns, never tans</label>
+        <label><input type="radio" name="fitzQ1" value="usually_burns"> Usually burns, tans minimally</label>
+        <label><input type="radio" name="fitzQ1" value="sometimes_burns"> Sometimes burns, tans gradually</label>
+        <label><input type="radio" name="fitzQ1" value="rarely_burns"> Rarely burns, tans well</label>
+        <label><input type="radio" name="fitzQ1" value="never_burns_tans_a_lot"> Very rarely burns, tans very easily/dark</label>
+        <label><input type="radio" name="fitzQ1" value="never_burns_always_dark"> Never burns, always deeply pigmented</label>
+      </div>
+    </div>
+    <div class="card">
+      <h2>3. What was the lighting like just now?</h2>
+      <div class="radioGroup" id="lightQ">
+        <label><input type="radio" name="lightQ" value="daylight_window"> Daylight, near a window</label>
+        <label><input type="radio" name="lightQ" value="room_light"> Normal indoor room light</label>
+        <label><input type="radio" name="lightQ" value="dim"> Dim / low light</label>
+        <label><input type="radio" name="lightQ" value="screen_only"> Mostly just my screen's light</label>
+      </div>
+    </div>
+    <div class="card">
+      <h2>4. Which device did you use to record?</h2>
+      <p class="hint">Any of these is fine — we just need to know which, so results can be
+        compared fairly.</p>
+      <div class="radioGroup" id="deviceQ">
+        <label><input type="radio" name="deviceQ" value="webcam_builtin"> Laptop/computer — built-in webcam</label>
+        <label><input type="radio" name="deviceQ" value="webcam_external"> Laptop/computer — external (USB) webcam</label>
+        <label><input type="radio" name="deviceQ" value="mobile_stable"> Mobile phone — placed on a stable surface (propped up, not held)</label>
+        <label><input type="radio" name="deviceQ" value="mobile_handheld"> Mobile phone — held in my hand</label>
+      </div>
+    </div>
+    <div class="row">
+      <button id="submitRatingBtn" class="primary" disabled>Finish</button>
+    </div>
+  </section>
+
+  <!-- ===================================================== saving ======= -->
+  <section id="screen-saving" class="screen" hidden>
+    <h1>Saving your recording…</h1>
+    <div class="progressOuter"><div id="progressBar" class="progressInner"></div></div>
+    <p id="savingMsg" class="hint">Checking your connection…</p>
+  </section>
+
+  <!-- ====================================================== done ======== -->
+  <section id="screen-done" class="screen" hidden>
+    <h1 id="doneTitle">Thank you!</h1>
+    <p id="doneMsg"></p>
+    <p class="hint">Your participant code: <code id="pidShown"></code> (quote this if you contact
+      the researcher).</p>
+    <div class="row" id="downloadRow" hidden>
+      <button id="downloadBtn">Download my recording</button>
+    </div>
+  </section>
+
+  <!-- ================================================== unsupported ===== -->
+  <section id="screen-unsupported" class="screen" hidden>
+    <h1>Your browser can't run this</h1>
+    <p id="unsupportedMsg">Please open this link in a recent version of Chrome, Edge, Firefox or
+      Safari, on a computer or phone with a working camera.</p>
+  </section>
+
+</div>
+<script type="module" src="app.js"></script>
+</body>
+</html>

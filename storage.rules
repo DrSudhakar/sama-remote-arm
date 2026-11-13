@@ -1,0 +1,16 @@
+rules_version = '2';
+// Paste into Firebase console -> Storage -> Rules -> Publish.
+// Caps a single upload at 600 MB (a 10-minute 640x480 webm is normally tens of MB; this is a very
+// generous ceiling, not a target) and only allows the two expected file names, so a stray script
+// can't be used to fill your bucket with arbitrary files.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /sessions/{study}/{pid}/{fileName} {
+      allow read: if false;   // download from the console (signed-in owner), not from the page
+      allow create: if (fileName == 'metadata.json' || fileName.matches('webcam\\.(webm|mp4)'))
+                    && request.resource.size < 600 * 1024 * 1024;
+      allow update, delete: if false;
+    }
+    match /{allPaths=**} { allow read, write: if false; }
+  }
+}

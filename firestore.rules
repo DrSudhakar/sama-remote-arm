@@ -1,0 +1,18 @@
+rules_version = '2';
+// Paste into Firebase console -> Firestore Database -> Rules -> Publish.
+// Participants never sign in, so every write is "anonymous": we trust the document shape, not an
+// identity. This is fine for a field study (nobody can read anyone else's data; a write can only
+// create a reasonably-sized metadata record), but it is not a substitute for not publishing secrets.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /sessions/{pid} {
+      allow read: if false;                     // nobody reads via the client; use the console
+      allow create: if request.resource.data.keys().hasAll(['participant_id', 'study_id'])
+                    && request.resource.data.participant_id == pid
+                    && request.resource.data.size() < 50;   // crude guard against junk/huge documents
+      allow update: if false;                   // one write per participant code; re-recording uses a new code
+      allow delete: if false;
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}
